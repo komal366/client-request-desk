@@ -1,0 +1,10 @@
+import axios from 'axios';
+export const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api' });
+api.interceptors.request.use(config => { const user = localStorage.getItem('crd-user'); if (user) config.headers['x-user-id'] = JSON.parse(user).id; return config; });
+export const getRequests = (params?: Record<string, string>) => api.get('/requests', { params }).then(r => r.data.data);
+export const getRequest = (id: string) => api.get(`/requests/${id}`).then(r => r.data.data);
+export const getActivity = (id: string) => api.get(`/requests/${id}/activity`).then(r => r.data.data);
+export const saveRequest = (data: object, id?: string) => (id ? api.patch(`/requests/${id}`, data) : api.post('/requests', data)).then(r => r.data.data);
+export const convertRequest = (id: string) => api.post(`/requests/${id}/convert`).then(r => r.data.data);
+export const getWorkItems = () => api.get('/work-items').then(r => r.data.data);
+export const getSummary = () => api.get('/work-items/summary').then(r => r.data.data);

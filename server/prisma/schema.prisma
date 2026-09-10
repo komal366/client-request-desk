@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum RequestStatus {
+  NEW
+  QUALIFIED
+  CLOSED
+}
+
+model Workspace {
+  id         String            @id @default(cuid())
+  name       String
+  createdAt  DateTime          @default(now())
+  users      User[]
+  requests   CustomerRequest[]
+  workItems  WorkItem[]
+  activities Activity[]
+}
+
+model User {
+  id          String     @id @default(cuid())
+  name        String
+  email       String     @unique
+  workspaceId String
+  createdAt   DateTime   @default(now())
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  activities  Activity[]
+  @@index([workspaceId])
+}
+
+model CustomerRequest {
+  id               String         @id @default(cuid())
+  workspaceId      String
+  customerName     String
+  customerEmail    String
+  requestedService String
+  description      String
+  scheduledDate    DateTime
+  status           RequestStatus  @default(NEW)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  workspace        Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  activities       Activity[]
+  workItem         WorkItem?
+  @@index([workspaceId, status])
+}
+
+model WorkItem {
+  id            String          @id @default(cuid())
+  workspaceId   String
+  requestId     String          @unique
+  customerName  String
+  service       String
+  scheduledDate DateTime
+  status        String          @default("OPEN")
+  createdAt     DateTime        @default(now())
+  workspace     Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  request       CustomerRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  @@index([workspaceId])
+}
+
+model Activity {
+  id          String          @id @default(cuid())
+  workspaceId String
+  requestId   String
+  userId      String
+  action      String
+  description String
+  createdAt   DateTime        @default(now())
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  request     CustomerRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([workspaceId, requestId, createdAt])
+}

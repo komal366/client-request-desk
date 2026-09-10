@@ -1,0 +1,14 @@
+import express from 'express';
+import cors from 'cors';
+import { authRouter } from './routes/auth';
+import { requestRouter } from './routes/requests';
+import { workItemRouter } from './routes/workItems';
+import { errorHandler } from './utils/errors';
+export const app = express();
+app.use(cors({ origin: process.env.CLIENT_URL ?? 'http://localhost:5173' }));
+app.use(express.json());
+app.get('/api/health', (_req, res) => res.json({ success: true, message: 'Client Request Desk API is healthy' }));
+app.use('/api/auth', authRouter);
+app.use('/api/requests', requestRouter);
+app.use('/api/work-items', workItemRouter);
+app.use(errorHandler);

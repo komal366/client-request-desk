@@ -1,0 +1,8 @@
+import { Router } from 'express';
+import { prisma } from '../config/prisma';
+import { mockAuthMiddleware } from '../middleware/auth';
+import { requireUser } from '../utils/errors';
+export const workItemRouter = Router();
+workItemRouter.use(mockAuthMiddleware);
+workItemRouter.get('/', async (req, res, next) => { try { const user = requireUser(req); const data = await prisma.workItem.findMany({ where: { workspaceId: user.workspaceId }, orderBy: { createdAt: 'desc' } }); res.json({ success: true, data }); } catch (error) { next(error); } });
+workItemRouter.get('/summary', async (req, res, next) => { try { const user = requireUser(req); const [total, newCount, qualified, closed, workItems, recentRequests, recentActivity] = await Promise.all([prisma.customerRequest.count({ where: { workspaceId: user.workspaceId } }), prisma.customerRequest.count({ where: { workspaceId: user.workspaceId, status: 'NEW' } }), prisma.customerRequest.count({ where: { workspaceId: user.workspaceId, status: 'QUALIFIED' } }), prisma.customerRequest.count({ where: { workspaceId: user.workspaceId, status: 'CLOSED' } }), prisma.workItem.count({ where: { workspaceId: user.workspaceId } }), prisma.customerRequest.findMany({ where: { workspaceId: user.workspaceId }, orderBy: { createdAt: 'desc' }, take: 5 }), prisma.activity.findMany({ where: { workspaceId: user.workspaceId }, include: { user: { select: { name: true } } }, orderBy: { createdAt: 'desc' }, take: 5 })]); res.json({ success: true, data: { total, new: newCount, qualified, closed, workItems, recentRequests, recentActivity } }); } catch (error) { next(error); } });
