@@ -25,6 +25,13 @@ Open `http://localhost:5173`. The API runs on port 5000. Run `npm run build` and
 - Activity timeline and useful loading, empty, error, and unauthorized states
 - Prisma SQLite persistence with seed data
 
+## Demo login
+
+- Alice — Demo Business A
+- Bob — Demo Business B
+
+No password is required. Select a demo user from the login screen.
+
 ## Architecture
 
 `client` is a Vite React TypeScript SPA. `server` is an Express TypeScript API. Prisma is the only database access layer and SQLite is used for local setup. The client stores only the selected demo user's identity and sends it as `x-user-id`.
@@ -66,3 +73,4 @@ Mock auth is intentional for the assignment and is not a replacement for session
 ## AI tools used
 
 The project was generated and reviewed with GitHub Copilot in VS Code.
+AI-generated code was reviewed, tested, and manually verified before submission.
